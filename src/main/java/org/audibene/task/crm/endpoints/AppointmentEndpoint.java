@@ -1,5 +1,6 @@
 package org.audibene.task.crm.endpoints;
 
+import org.audibene.task.crm.domain.AppointmentService;
 import org.audibene.task.crm.domain.data.Appointment;
 import org.audibene.task.crm.domain.repository.AppointmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +13,17 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.time.LocalDateTime;
 
 @Controller
 @Path("appointments")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class AppointmentEndpoint {
 
     @Autowired
     private AppointmentRepository appointmentRepository;
+
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -30,8 +35,6 @@ public class AppointmentEndpoint {
     }
 
     @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
     public Response createAppointment(Appointment appointment) {
         Appointment appointmentCreated = appointmentRepository.save(appointment);
         return Response.status(Response.Status.OK)
@@ -41,8 +44,13 @@ public class AppointmentEndpoint {
 
     @GET
     @Path("/next7days")
-    @Produces(MediaType.APPLICATION_JSON)
-    public String getNextWeekAppointments() {
-        return null;
+    public Response getNextWeekAppointments() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime weekAfter = now.plusWeeks(1L);
+        Iterable<Appointment> forPeriod = appointmentRepository.findForPeriod(Appointment.toDate(now), Appointment.toDate(weekAfter));
+
+        return Response.status(Response.Status.OK)
+                .entity(forPeriod)
+                .build();
     }
 }

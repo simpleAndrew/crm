@@ -20,6 +20,7 @@ import java.util.stream.StreamSupport;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
+import static org.audibene.task.crm.domain.data.Appointment.toDate;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -88,31 +89,6 @@ public class AppointmentRepositoryTest {
 
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
-    public void shouldReturnLatestAppointment() {
-        //given
-        Client client = clientRepository.save(Client.ofName("John Smith"));
-        LocalDateTime timeOfFirstAppointment = LocalDateTime.now();
-        LocalDateTime timeOfLatestAppointment = timeOfFirstAppointment.plusDays(1);
-
-        appointmentRepository.save(Appointment.forClientOnDate(client, timeOfFirstAppointment));
-
-        Appointment expectedToBeLastAppointment =
-                appointmentRepository.save(Appointment.forClientOnDate(client, timeOfLatestAppointment));
-
-        //when
-        Iterable<Appointment> appointments = appointmentRepository.getLatestAppointment(client.getId());
-
-        //then
-        assertThat(appointments).isNotEmpty();
-
-        Appointment latestAppointment = appointments.iterator().next();
-
-        assertThat(latestAppointment.getId()).isEqualTo(expectedToBeLastAppointment.getId());
-        assertThat(latestAppointment.getAppointmentTime().getTime()).isEqualTo(expectedToBeLastAppointment.getAppointmentTime().getTime());
-    }
-
-    @Test
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     public void shouldReturnAppointmentsFromGivenPeriod() {
         //given
         Client client = clientRepository.save(Client.ofName("Magic Johnson"));
@@ -125,8 +101,8 @@ public class AppointmentRepositoryTest {
                 .map(Appointment::getId)
                 .collect(toList());
 
-        Date from = Appointment.toDate(now.minusDays(1));
-        Date to = Appointment.toDate(now.plusDays(7));
+        Date from = toDate(now.minusDays(1));
+        Date to = toDate(now.plusDays(7));
 
         //when
         Iterable<Appointment> forPeriod = appointmentRepository.findForPeriod(from, to);

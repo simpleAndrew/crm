@@ -1,5 +1,6 @@
 package org.audibene.task.crm.endpoints;
 
+import org.audibene.task.crm.domain.AppointmentService;
 import org.audibene.task.crm.domain.data.Appointment;
 import org.audibene.task.crm.domain.data.Client;
 import org.audibene.task.crm.domain.repository.AppointmentRepository;
@@ -16,10 +17,15 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Collections;
+import java.util.Optional;
 
 @Controller
 @Path("/clients")
 public class ClientsEndpoint {
+
+
+    @Autowired
+    private AppointmentService appointmentService;
 
     @Autowired
     private ClientRepository clientRepository;
@@ -73,17 +79,22 @@ public class ClientsEndpoint {
     public Response createAppointment(@PathParam("clientId") Long clientId, Appointment appointment) {
         Appointment save = appointmentRepository.save(appointment);
         return Response.status(Response.Status.OK)
-                .entity(appointment)
+                .entity(save)
                 .build();
     }
 
     @GET
-    @Path("{clientId}/appointments/latest")
+    @Path("{clientId}/appointments/next")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getLatestAppointment(@PathParam("clientId") Long clientId) {
-        Appointment latestAppointment = appointmentRepository.getLatestAppointment(clientId).iterator().next();
-        return Response.status(Response.Status.OK)
-                .entity(latestAppointment)
-                .build();
+        Optional<Appointment> nearestAppointment = appointmentService.getNearestAppointment(clientId);
+
+        if (nearestAppointment.isPresent()) {
+            return Response.status(Response.Status.OK)
+                    .entity(nearestAppointment.get())
+                    .build();
+        } else {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
     }
 }
