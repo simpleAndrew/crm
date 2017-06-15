@@ -34,8 +34,8 @@ public class AppointmentRepositoryTest {
     @Test
     public void shouldGenerateId() {
         //given
-        LocalDateTime appTime = LocalDateTime.now();
-        Appointment appointment = Appointment.onDate(appTime);
+        Client client = clientRepository.save(Client.ofName("Harry Potter"));
+        Appointment appointment = Appointment.forClientOnDate(client, LocalDateTime.now());
 
         //when
         Appointment savedAppointment = appointmentRepository.save(appointment);
@@ -64,7 +64,20 @@ public class AppointmentRepositoryTest {
     @Test(expected = ConstraintViolationException.class)
     public void shouldNotAcceptEmptyDate() {
         //given
-        Appointment appointment = new Appointment();
+        Client clientToGetAppointment = clientRepository.save(Client.ofName("John Smith"));
+        Appointment appointment = new Appointment(null, clientToGetAppointment);
+
+        //when
+        Appointment save = appointmentRepository.save(appointment);
+
+        //then
+        fail("Validation exception should be thrown");
+    }
+
+    @Test(expected = ConstraintViolationException.class)
+    public void shouldNotAcceptEmptyClient() {
+        //given
+        Appointment appointment = Appointment.onDate(LocalDateTime.now());
 
         //when
         Appointment save = appointmentRepository.save(appointment);

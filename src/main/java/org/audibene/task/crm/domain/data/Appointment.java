@@ -39,6 +39,7 @@ public class Appointment {
 
     @ManyToOne
     @JoinColumn(name = "client_id")
+    @NotNull
     private Client client;
 
     public Appointment() {}
