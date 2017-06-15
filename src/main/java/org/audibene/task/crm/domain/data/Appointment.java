@@ -4,6 +4,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
@@ -17,8 +19,11 @@ public class Appointment {
     @NotNull
     private LocalDateTime appointmentTime;
 
-    public Appointment() {
-    }
+    @ManyToOne
+    @JoinColumn(name = "client_id")
+    private Client client;
+
+    public Appointment() {}
 
     public Appointment(LocalDateTime appointmentTime) {
         this.appointmentTime = appointmentTime;
@@ -34,5 +39,13 @@ public class Appointment {
 
     public void setAppointmentTime(LocalDateTime appointmentTime) {
         this.appointmentTime = appointmentTime;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    public Client getClient() {
+        return client;
     }
 }
