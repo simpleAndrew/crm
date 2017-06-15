@@ -16,18 +16,20 @@ public class Client {
     private String fullName;
 
     public static Client idOnly(Long id) {
-        return new Client(id);
+        return new Client(id, null);
+    }
+
+    public static Client ofName(String fullName) {
+        return new Client(null, fullName);
     }
 
     public Client() {}
 
-    private Client(Long id) {
-        this.id =id;
-    }
-
-    public Client(String fullName) {
+    public Client(Long id, String fullName) {
+        this.id = id;
         this.fullName = fullName;
     }
+
 
     public Long getId() {
         return id;

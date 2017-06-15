@@ -26,7 +26,12 @@ public class Appointment {
     public Appointment() {}
 
     public Appointment(LocalDateTime appointmentTime) {
+        this(appointmentTime, null);
+    }
+
+    public Appointment(LocalDateTime appointmentTime, Client client) {
         this.appointmentTime = appointmentTime;
+        this.client = client;
     }
 
     public Long getId() {

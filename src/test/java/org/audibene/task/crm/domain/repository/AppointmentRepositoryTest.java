@@ -9,7 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.validation.ConstraintViolationException;
-
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,7 +40,7 @@ public class AppointmentRepositoryTest {
     @Test
     public void shouldCreateConnectionWithClient() {
         //given
-        Client clientToGetAppointment = new Client("John Smith");
+        Client clientToGetAppointment = Client.ofName("John Smith");
         Client persistedClient = clientRepository.save(clientToGetAppointment);
 
         Appointment appointment = new Appointment(LocalDateTime.now());
@@ -65,6 +64,29 @@ public class AppointmentRepositoryTest {
 
         //then
         fail("Validation exception should be thrown");
+    }
+
+    @Test
+    public void shouldReturnLatestAppointment() {
+        //given
+        Client client = clientRepository.save(Client.ofName("John Smith"));
+        LocalDateTime timeOfFirstAppointment = LocalDateTime.now();
+        LocalDateTime timeOfLatestAppointment = timeOfFirstAppointment.plusDays(1);
+
+        appointmentRepository.save(new Appointment(timeOfFirstAppointment, client));
+        Appointment expectedToBeLastAppointment =
+                appointmentRepository.save(new Appointment(timeOfLatestAppointment, client));
+
+        //when
+        Iterable<Appointment> appointments = appointmentRepository.getLatestAppointment(client.getId());
+
+        //then
+        assertThat(appointments).isNotEmpty();
+
+        Appointment latestAppointment = appointments.iterator().next();
+
+        assertThat(latestAppointment.getId()).isEqualTo(expectedToBeLastAppointment.getId());
+        assertThat(latestAppointment.getAppointmentTime()).isEqualTo(expectedToBeLastAppointment.getAppointmentTime());
     }
 
 }

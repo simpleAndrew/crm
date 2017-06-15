@@ -81,7 +81,7 @@ public class ClientsEndpoint {
     @Path("{clientId}/appointments/latest")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getLatestAppointment(@PathParam("clientId") Long clientId) {
-        Appointment latestAppointment = appointmentRepository.getLatestAppointment(clientId);
+        Appointment latestAppointment = appointmentRepository.getLatestAppointment(clientId).iterator().next();
         return Response.status(Response.Status.OK)
                 .entity(latestAppointment)
                 .build();
