@@ -13,8 +13,14 @@ import java.util.List;
 public interface AppointmentRepository extends CrudRepository<Appointment, Long> {
 
 
+    @Query("Select a from Appointment a where a.client.id=:clientId order by a.appointmentTime asc")
+    List<Appointment> getAllClientAppointments(@Param("clientId") Long clientId);
+
     @Query("Select a from Appointment a where a.client.id=:clientId AND a.appointmentTime >= :fromDate order by a.appointmentTime asc")
-    List<Appointment> getNextNearestAppointments(@Param("clientId") Long clientId, @Param("fromDate") Date from);
+    List<Appointment> getNextAppointments(@Param("clientId") Long clientId, @Param("fromDate") Date from);
+
+    @Query("Select a from Appointment a where a.client.id=:clientId AND a.appointmentTime <= :toDate order by a.appointmentTime desc")
+    List<Appointment> getPreviousAppointments(@Param("clientId") Long clientId, @Param("toDate") Date toDate);
 
     @Query("select a from Appointment a where a.appointmentTime > :fromTime AND a.appointmentTime < :toTime order by a.appointmentTime asc")
     List<Appointment> findForPeriod(@Param("fromTime") Date from,

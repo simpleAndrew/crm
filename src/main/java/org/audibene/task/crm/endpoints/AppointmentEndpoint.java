@@ -9,8 +9,11 @@ import org.springframework.stereotype.Controller;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
@@ -24,6 +27,8 @@ public class AppointmentEndpoint {
     @Autowired
     private AppointmentRepository appointmentRepository;
 
+    @Autowired
+    private AppointmentService appointmentService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -43,14 +48,18 @@ public class AppointmentEndpoint {
     }
 
     @GET
-    @Path("/next7days")
+    @Path("/nextWeek")
     public Response getNextWeekAppointments() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime weekAfter = now.plusWeeks(1L);
-        Iterable<Appointment> forPeriod = appointmentRepository.findForPeriod(Appointment.toDate(now), Appointment.toDate(weekAfter));
-
         return Response.status(Response.Status.OK)
-                .entity(forPeriod)
+                .entity(appointmentService.getNextWeekAppointments(LocalDateTime.now()))
+                .build();
+    }
+
+    @PUT
+    @Path("/{appointmentId}/rate")
+    public Response rateAppintment(@PathParam("appointmentId") Long appointmentId, @QueryParam("rating") String rating) {
+        return Response.ok()
+                .entity(appointmentService.rateAppointment(appointmentId, rating))
                 .build();
     }
 }

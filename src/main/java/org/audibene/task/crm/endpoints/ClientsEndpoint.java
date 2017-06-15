@@ -16,11 +16,14 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Collections;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Controller
 @Path("/clients")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+
 public class ClientsEndpoint {
 
 
@@ -33,8 +36,7 @@ public class ClientsEndpoint {
     private AppointmentRepository appointmentRepository;
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response clientList() {
+    public Response getClients() {
         return Response.status(Response.Status.OK)
                 .entity(clientRepository.findAll())
                 .build();
@@ -42,8 +44,7 @@ public class ClientsEndpoint {
 
     @GET
     @Path("{clientId}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response clientList(@PathParam("clientId") Long clientId) {
+    public Response getClient(@PathParam("clientId") Long clientId) {
         Client client = clientRepository.findOne(clientId);
         if (client != null) {
             return Response.status(Response.Status.OK)
@@ -54,8 +55,6 @@ public class ClientsEndpoint {
     }
 
     @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
     public Response createClient(Client client) {
         Client savedClient = clientRepository.save(client);
         return Response.status(Response.Status.OK)
@@ -65,17 +64,14 @@ public class ClientsEndpoint {
 
     @GET
     @Path("{clientId}/appointments")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getAppointments(@PathParam("clientId") String clientId) {
+    public Response getAppointments(@PathParam("clientId") Long clientId) {
         return Response.status(Response.Status.OK)
-                .entity(Collections.emptyList())
+                .entity(appointmentService.getAppointmentsForClient(clientId))
                 .build();
     }
 
     @POST
     @Path("{clientId}/appointments")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
     public Response createAppointment(@PathParam("clientId") Long clientId, Appointment appointment) {
         Appointment save = appointmentRepository.save(appointment);
         return Response.status(Response.Status.OK)
@@ -85,9 +81,22 @@ public class ClientsEndpoint {
 
     @GET
     @Path("{clientId}/appointments/next")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getLatestAppointment(@PathParam("clientId") Long clientId) {
-        Optional<Appointment> nearestAppointment = appointmentService.getNearestAppointment(clientId);
+    public Response getUpcommingAppointment(@PathParam("clientId") Long clientId) {
+        Optional<Appointment> nearestAppointment = appointmentService.getNearestAppointment(clientId, LocalDateTime.now());
+
+        if (nearestAppointment.isPresent()) {
+            return Response.status(Response.Status.OK)
+                    .entity(nearestAppointment.get())
+                    .build();
+        } else {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+    }
+
+    @GET
+    @Path("{clientId}/appointments/last")
+    public Response getLastVisitedAppointment(@PathParam("clientId") Long clientId) {
+        Optional<Appointment> nearestAppointment = appointmentService.getLastVisitedAppointment(clientId, LocalDateTime.now());
 
         if (nearestAppointment.isPresent()) {
             return Response.status(Response.Status.OK)

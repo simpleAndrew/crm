@@ -1,6 +1,7 @@
 package org.audibene.task.crm.domain.data;
 
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -38,9 +39,11 @@ public class Appointment {
     private Date appointmentTime;
 
     @ManyToOne
-    @JoinColumn(name = "client_id")
+    @JoinColumn(name = "client_id", foreignKey = @ForeignKey(name="appointmentToClient"))
     @NotNull
     private Client client;
+
+    private String rating;
 
     public Appointment() {}
 
@@ -51,6 +54,12 @@ public class Appointment {
     public Appointment(Date appointmentTime, Client client) {
         this.appointmentTime = appointmentTime;
         this.client = client;
+    }
+
+    public Appointment(Date appointmentTime, Client client, String rating) {
+        this.appointmentTime = appointmentTime;
+        this.client = client;
+        this.rating = rating;
     }
 
     public Long getId() {
@@ -71,5 +80,13 @@ public class Appointment {
 
     public Client getClient() {
         return client;
+    }
+
+    public String getRating() {
+        return rating;
+    }
+
+    public void setRating(String rating) {
+        this.rating = rating;
     }
 }
