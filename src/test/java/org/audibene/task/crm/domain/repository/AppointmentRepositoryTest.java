@@ -6,11 +6,18 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
 
@@ -28,7 +35,7 @@ public class AppointmentRepositoryTest {
     public void shouldGenerateId() {
         //given
         LocalDateTime appTime = LocalDateTime.now();
-        Appointment appointment = new Appointment(appTime);
+        Appointment appointment = Appointment.onDate(appTime);
 
         //when
         Appointment savedAppointment = appointmentRepository.save(appointment);
@@ -43,7 +50,7 @@ public class AppointmentRepositoryTest {
         Client clientToGetAppointment = Client.ofName("John Smith");
         Client persistedClient = clientRepository.save(clientToGetAppointment);
 
-        Appointment appointment = new Appointment(LocalDateTime.now());
+        Appointment appointment = Appointment.onDate(LocalDateTime.now());
         appointment.setClient(Client.idOnly(persistedClient.getId()));
 
         //when
@@ -67,15 +74,17 @@ public class AppointmentRepositoryTest {
     }
 
     @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     public void shouldReturnLatestAppointment() {
         //given
         Client client = clientRepository.save(Client.ofName("John Smith"));
         LocalDateTime timeOfFirstAppointment = LocalDateTime.now();
         LocalDateTime timeOfLatestAppointment = timeOfFirstAppointment.plusDays(1);
 
-        appointmentRepository.save(new Appointment(timeOfFirstAppointment, client));
+        appointmentRepository.save(Appointment.forClientOnDate(client, timeOfFirstAppointment));
+
         Appointment expectedToBeLastAppointment =
-                appointmentRepository.save(new Appointment(timeOfLatestAppointment, client));
+                appointmentRepository.save(Appointment.forClientOnDate(client, timeOfLatestAppointment));
 
         //when
         Iterable<Appointment> appointments = appointmentRepository.getLatestAppointment(client.getId());
@@ -86,7 +95,35 @@ public class AppointmentRepositoryTest {
         Appointment latestAppointment = appointments.iterator().next();
 
         assertThat(latestAppointment.getId()).isEqualTo(expectedToBeLastAppointment.getId());
-        assertThat(latestAppointment.getAppointmentTime()).isEqualTo(expectedToBeLastAppointment.getAppointmentTime());
+        assertThat(latestAppointment.getAppointmentTime().getTime()).isEqualTo(expectedToBeLastAppointment.getAppointmentTime().getTime());
+    }
+
+    @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
+    public void shouldReturnAppointmentsFromGivenPeriod() {
+        //given
+        Client client = clientRepository.save(Client.ofName("Magic Johnson"));
+        LocalDateTime now = LocalDateTime.now();
+
+        List<Long> expectedAppointmentIds = IntStream.range(0, 6)
+                .mapToObj(now::plusDays)
+                .map(date -> Appointment.forClientOnDate(client, date))
+                .map(appointmentRepository::save)
+                .map(Appointment::getId)
+                .collect(toList());
+
+        Date from = Appointment.toDate(now.minusDays(1));
+        Date to = Appointment.toDate(now.plusDays(7));
+
+        //when
+        Iterable<Appointment> forPeriod = appointmentRepository.findForPeriod(from, to);
+        Stream<Appointment> stream = StreamSupport.stream(forPeriod.spliterator(), false);
+        List<Long> returnedAppointmentIds = stream
+                .map(Appointment::getId)
+                .collect(toList());
+
+        //then
+        assertThat(returnedAppointmentIds).isEqualTo(expectedAppointmentIds);
     }
 
 }

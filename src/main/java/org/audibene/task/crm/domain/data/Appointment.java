@@ -6,18 +6,36 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Date;
 
 @Entity
 public class Appointment {
+
+    private static final ZoneOffset DEFAULT_ZONE = ZoneOffset.UTC;
+
+    public static Date toDate(LocalDateTime localDateTime) {
+        return Date.from(localDateTime.toInstant(DEFAULT_ZONE));
+    }
+    public static Appointment onDate(LocalDateTime localDateTime) {
+        return new Appointment(toDate(localDateTime));
+    }
+
+    public static Appointment forClientOnDate(Client client, LocalDateTime localDateTime) {
+        return new Appointment(toDate(localDateTime), client);
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @NotNull
-    private LocalDateTime appointmentTime;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date appointmentTime;
 
     @ManyToOne
     @JoinColumn(name = "client_id")
@@ -25,11 +43,11 @@ public class Appointment {
 
     public Appointment() {}
 
-    public Appointment(LocalDateTime appointmentTime) {
+    public Appointment(Date appointmentTime) {
         this(appointmentTime, null);
     }
 
-    public Appointment(LocalDateTime appointmentTime, Client client) {
+    public Appointment(Date appointmentTime, Client client) {
         this.appointmentTime = appointmentTime;
         this.client = client;
     }
@@ -38,11 +56,11 @@ public class Appointment {
         return id;
     }
 
-    public LocalDateTime getAppointmentTime() {
+    public Date getAppointmentTime() {
         return appointmentTime;
     }
 
-    public void setAppointmentTime(LocalDateTime appointmentTime) {
+    public void setAppointmentTime(Date appointmentTime) {
         this.appointmentTime = appointmentTime;
     }
 
