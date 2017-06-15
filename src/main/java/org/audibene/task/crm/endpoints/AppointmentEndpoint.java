@@ -3,7 +3,7 @@ package org.audibene.task.crm.endpoints;
 import org.audibene.task.crm.domain.data.Appointment;
 import org.audibene.task.crm.domain.repository.AppointmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -13,7 +13,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Component
+@Controller
 @Path("appointments")
 public class AppointmentEndpoint {
 
