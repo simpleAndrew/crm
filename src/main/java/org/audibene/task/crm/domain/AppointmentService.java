@@ -51,9 +51,14 @@ public class AppointmentService {
     }
 
 
-    public Appointment rateAppointment(Long appointmentId, String rating) {
-        Appointment one = appointmentRepository.findOne(appointmentId);
-        one.setRating(rating);
-        return appointmentRepository.save(one);
+    public Optional<Appointment> rateAppointment(Long appointmentId, String rating) {
+        Appointment appointmentToRate = appointmentRepository.findOne(appointmentId);
+
+        if(appointmentToRate == null) {
+            return Optional.empty();
+        }
+
+        appointmentToRate.setRating(rating);
+        return Optional.of(appointmentRepository.save(appointmentToRate));
     }
 }

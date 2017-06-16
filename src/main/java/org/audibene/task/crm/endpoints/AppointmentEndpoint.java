@@ -17,6 +17,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Controller
 @Path("appointments")
@@ -34,7 +35,7 @@ public class AppointmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllAppointments() {
         Iterable<Appointment> all = appointmentRepository.findAll();
-        return Response.status(Response.Status.OK)
+        return Response.ok()
                 .entity(all)
                 .build();
     }
@@ -42,7 +43,7 @@ public class AppointmentEndpoint {
     @POST
     public Response createAppointment(Appointment appointment) {
         Appointment appointmentCreated = appointmentRepository.save(appointment);
-        return Response.status(Response.Status.OK)
+        return Response.ok()
                 .entity(appointmentCreated)
                 .build();
     }
@@ -50,7 +51,7 @@ public class AppointmentEndpoint {
     @GET
     @Path("/nextWeek")
     public Response getNextWeekAppointments() {
-        return Response.status(Response.Status.OK)
+        return Response.ok()
                 .entity(appointmentService.getNextWeekAppointments(LocalDateTime.now()))
                 .build();
     }
@@ -58,8 +59,14 @@ public class AppointmentEndpoint {
     @PUT
     @Path("/{appointmentId}/rate")
     public Response rateAppintment(@PathParam("appointmentId") Long appointmentId, @QueryParam("rating") String rating) {
-        return Response.ok()
-                .entity(appointmentService.rateAppointment(appointmentId, rating))
-                .build();
+        Optional<Appointment> ratedAppointment = appointmentService.rateAppointment(appointmentId, rating);
+
+        if (ratedAppointment.isPresent()) {
+            return Response.ok()
+                    .entity(ratedAppointment)
+                    .build();
+        }
+        
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 }

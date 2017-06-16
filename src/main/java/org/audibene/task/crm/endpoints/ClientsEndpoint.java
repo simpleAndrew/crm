@@ -23,7 +23,6 @@ import java.util.Optional;
 @Path("/clients")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-
 public class ClientsEndpoint {
 
 
@@ -37,7 +36,7 @@ public class ClientsEndpoint {
 
     @GET
     public Response getClients() {
-        return Response.status(Response.Status.OK)
+        return Response.ok()
                 .entity(clientRepository.findAll())
                 .build();
     }
@@ -47,7 +46,7 @@ public class ClientsEndpoint {
     public Response getClient(@PathParam("clientId") Long clientId) {
         Client client = clientRepository.findOne(clientId);
         if (client != null) {
-            return Response.status(Response.Status.OK)
+            return Response.ok()
                     .entity(client)
                     .build();
         }
@@ -57,7 +56,7 @@ public class ClientsEndpoint {
     @POST
     public Response createClient(Client client) {
         Client savedClient = clientRepository.save(client);
-        return Response.status(Response.Status.OK)
+        return Response.ok()
                 .entity(savedClient)
                 .build();
     }
@@ -65,7 +64,7 @@ public class ClientsEndpoint {
     @GET
     @Path("{clientId}/appointments")
     public Response getAppointments(@PathParam("clientId") Long clientId) {
-        return Response.status(Response.Status.OK)
+        return Response.ok()
                 .entity(appointmentService.getAppointmentsForClient(clientId))
                 .build();
     }
@@ -74,7 +73,7 @@ public class ClientsEndpoint {
     @Path("{clientId}/appointments")
     public Response createAppointment(@PathParam("clientId") Long clientId, Appointment appointment) {
         Appointment save = appointmentRepository.save(appointment);
-        return Response.status(Response.Status.OK)
+        return Response.ok()
                 .entity(save)
                 .build();
     }
@@ -85,7 +84,7 @@ public class ClientsEndpoint {
         Optional<Appointment> nearestAppointment = appointmentService.getNearestAppointment(clientId, LocalDateTime.now());
 
         if (nearestAppointment.isPresent()) {
-            return Response.status(Response.Status.OK)
+            return Response.ok()
                     .entity(nearestAppointment.get())
                     .build();
         } else {
@@ -99,7 +98,7 @@ public class ClientsEndpoint {
         Optional<Appointment> nearestAppointment = appointmentService.getLastVisitedAppointment(clientId, LocalDateTime.now());
 
         if (nearestAppointment.isPresent()) {
-            return Response.status(Response.Status.OK)
+            return Response.ok()
                     .entity(nearestAppointment.get())
                     .build();
         } else {
