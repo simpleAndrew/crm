@@ -6,8 +6,8 @@ I've implemented all use cases listed. Application exposes 2 REST services: appo
 Through POST:clients/ you should be able to create clients. Then through POST:clients/<id/appointments/ you can register appointments. JSON structure samples are included in resources directory so you can start with something.
 
 App is built my maven and you should be able to find jar in /target dir. When you run it it starts on 8080 port (sorry - didn't change that) and runs with DB which then is preserved, so on restart it will recover information out of it.
-#### REST Endpoints ####
-##### Some endpoints for clients: #####
+#### REST Endpoints
+##### Some endpoints for clients:
 * GET:clients/<id>/appointments - list all client appointments
 * GET:clients/<id>/appointments/last - get last visited appointment (basically, to be able to rate it)
 * GET:clients/<id>/appointments/next - get next upcoming appointment
