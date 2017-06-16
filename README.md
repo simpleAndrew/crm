@@ -6,23 +6,23 @@ I've implemented all use cases listed. Application exposes 2 REST services: appo
 Through POST:clients/ you should be able to create clients. Then through POST:clients/<id/appointments/ you can register appointments. JSON structure samples are included in resources directory so you can start with something.
 
 App is built my maven and you should be able to find jar in /target dir. When you run it it starts on 8080 port (sorry - didn't change that) and runs with DB which then is preserved, so on restart it will recover information out of it.
-####REST Endpoints
-#####Some endpoints for clients:
+#### REST Endpoints ####
+##### Some endpoints for clients: #####
 * GET:clients/<id>/appointments - list all client appointments
 * GET:clients/<id>/appointments/last - get last visited appointment (basically, to be able to rate it)
 * GET:clients/<id>/appointments/next - get next upcoming appointment
 vPOST:clients/<id>/appointments - create appointment for client.
 
-#####For appointments:
+##### For appointments:
 * GET:appointments/nextWeek - to get appointments for next 7 days starting tomorrow
 * PUT::appointments/<id>/rate?rating=<any string rating> - to rate appointment
 
-####Tradeoffs
-#####Business tradeoffs made:
+#### Tradeoffs
+##### Business tradeoffs made:
 * definition of week is not obvious so I went with next 7 days, starting from tomorrow
 * rating is part of appointment, so we can't do rating multiple times
 * both, client and appointment, has only minimum information
-#####Technical tradeoffs (a lot of them):
+##### Technical tradeoffs (a lot of them):
 * poor test coverage - I was more in technology browsing than in implementation, so tests came later
 * no significant validation
 * no correct error handling
