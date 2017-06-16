@@ -3,7 +3,6 @@ package org.audibene.task.crm.endpoints;
 import org.audibene.task.crm.domain.AppointmentService;
 import org.audibene.task.crm.domain.data.Appointment;
 import org.audibene.task.crm.domain.data.Client;
-import org.audibene.task.crm.domain.repository.AppointmentRepository;
 import org.audibene.task.crm.domain.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -31,8 +30,6 @@ public class ClientsEndpoint {
 
     @Autowired
     private ClientRepository clientRepository;
-    @Autowired
-    private AppointmentRepository appointmentRepository;
 
     @GET
     public Response getClients() {
@@ -72,9 +69,9 @@ public class ClientsEndpoint {
     @POST
     @Path("{clientId}/appointments")
     public Response createAppointment(@PathParam("clientId") Long clientId, Appointment appointment) {
-        Appointment save = appointmentRepository.save(appointment);
+        Appointment createAppointment = appointmentService.createAppointment(clientId, appointment);
         return Response.ok()
-                .entity(save)
+                .entity(createAppointment)
                 .build();
     }
 
