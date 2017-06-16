@@ -32,12 +32,24 @@ public class AppointmentEndpoint {
     private AppointmentService appointmentService;
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
     public Response getAllAppointments() {
         Iterable<Appointment> all = appointmentRepository.findAll();
         return Response.ok()
                 .entity(all)
                 .build();
+    }
+
+    @GET
+    @Path("/{appointmentId}")
+    public Response getAppointment(@PathParam("appointmentId") Long appointmentId) {
+        Appointment appointment = appointmentRepository.findOne(appointmentId);
+        if(appointment != null) {
+            return Response.ok()
+                    .entity(appointment)
+                    .build();
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
+
     }
 
     @POST
@@ -63,7 +75,7 @@ public class AppointmentEndpoint {
 
         if (ratedAppointment.isPresent()) {
             return Response.ok()
-                    .entity(ratedAppointment)
+                    .entity(ratedAppointment.get())
                     .build();
         }
         

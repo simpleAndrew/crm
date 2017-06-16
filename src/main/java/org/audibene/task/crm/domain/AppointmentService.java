@@ -1,7 +1,9 @@
 package org.audibene.task.crm.domain;
 
 import org.audibene.task.crm.domain.data.Appointment;
+import org.audibene.task.crm.domain.data.Client;
 import org.audibene.task.crm.domain.repository.AppointmentRepository;
+import org.audibene.task.crm.domain.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,9 @@ public class AppointmentService {
 
     @Autowired
     private AppointmentRepository appointmentRepository;
+
+    @Autowired
+    private ClientRepository clientRepository;
 
     public Optional<Appointment> getNearestAppointment(Long clientId, LocalDateTime since) {
         Date fromDate = Appointment.toDate(since);
@@ -40,6 +45,17 @@ public class AppointmentService {
         return Optional.of(previousAppointments.get(0));
     }
 
+    public Appointment createAppointment(Long clientId, Appointment appointment) {
+        Client clientToCreateAppointment = clientRepository.findOne(clientId);
+
+        if(clientToCreateAppointment == null) {
+            throw new IllegalStateException("Client with id " + clientId + "does not exist");
+        }
+
+        appointment.setClient(clientToCreateAppointment);
+        return appointmentRepository.save(appointment);
+    }
+
     public List<Appointment> getAppointmentsForClient(Long clientId) {
         return appointmentRepository.getAllClientAppointments(clientId);
     }
@@ -54,7 +70,7 @@ public class AppointmentService {
     public Optional<Appointment> rateAppointment(Long appointmentId, String rating) {
         Appointment appointmentToRate = appointmentRepository.findOne(appointmentId);
 
-        if(appointmentToRate == null) {
+        if (appointmentToRate == null) {
             return Optional.empty();
         }
 
